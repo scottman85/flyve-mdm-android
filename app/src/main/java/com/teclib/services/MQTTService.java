@@ -18,6 +18,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
@@ -96,7 +97,6 @@ public class MQTTService extends Service implements MqttCallback {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     // We are connected
                     Log.d(TAG, "onSuccess");
-                    //Toast.makeText( getApplicationContext(), "CONNECTION OK!", Toast.LENGTH_SHORT);
                     suscribe();
                 }
 
@@ -104,7 +104,6 @@ public class MQTTService extends Service implements MqttCallback {
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     // Something went wrong e.g. connection timeout or firewall problems
                     Log.d(TAG, "onFailure");
-                    //Toast.makeText( getApplicationContext(), "CONNECTION FAIL", Toast.LENGTH_SHORT);
                 }
             });
         }
@@ -119,25 +118,39 @@ public class MQTTService extends Service implements MqttCallback {
     @Override
     public void connectionLost(Throwable cause) {
         Log.d(TAG, "Connection fail " + cause.getMessage());
-        //Toast.makeText( getApplicationContext(), "Connection fail " + cause.getMessage(), Toast.LENGTH_SHORT);
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        Log.d(TAG, "Message " + message);
-        //Toast.makeText( getApplicationContext(), "Message " + message, Toast.LENGTH_SHORT);
+        Log.d(TAG, "Topic " + topic);
+        Log.d(TAG, "Message " + message.getPayload());
+
+        String messageBody;
+        messageBody = new String(message.getPayload());
+
+        try {
+            JSONObject jsonObj = new JSONObject(messageBody);
+
+            // KeepAlive
+            if (jsonObj.has("query")) {
+                if ("Ping".equals(jsonObj.getString("query"))) {
+                    sendKeepAlive();
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
         Log.d(TAG, "deliveryComplete ");
-        //Toast.makeText( getApplicationContext(), "deliveryComplete " + token, Toast.LENGTH_SHORT);
     }
 
-    private void sendPayloadTest() {
-
-        String topic = mTopic;
-        String payload = "the payload test from " + mUser;
+    private void sendKeepAlive() {
+        String topic = mTopic + "/Status/Ping";
+        String payload = "!";
         byte[] encodedPayload = new byte[0];
         try {
             encodedPayload = payload.getBytes("UTF-8");
@@ -148,12 +161,10 @@ public class MQTTService extends Service implements MqttCallback {
             e.printStackTrace();
             Log.d(TAG, "ERROR: " + e.getMessage());
         }
-
     }
 
     private void suscribe() {
-
-        String topic = mTopic;
+        String topic = mTopic + "/#";
         int qos = 1;
         try {
             IMqttToken subToken = client.subscribe(topic, qos);
@@ -178,27 +189,4 @@ public class MQTTService extends Service implements MqttCallback {
         }
     }
 
-//    private void createNotification(String message)
-//    {
-//
-//        Intent intent = new Intent(this, MQTTService.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//
-//        PendingIntent pendingIntent = PendingIntent.getService(this, 0 /* Request code */, intent,
-//                0);
-//
-//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setContentTitle("Flyve MDM")
-//                .setContentText(message)
-//                .setAutoCancel(true)
-//                .setOngoing(true)
-//                .setWhen(System.currentTimeMillis())
-//                .setContentIntent(pendingIntent);
-//
-//        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//        notificationManager.notify(121 , notificationBuilder.build());
-//
-//    }
 }

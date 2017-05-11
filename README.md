@@ -8,10 +8,11 @@ JSON Format:
 
 Features:
 - If not register just show and Splash
-- Working with deep link
+- Enroll with deep link
 - Working on background services
 - Simple register workflow with user and email
+- Get and reply ping from API
 
 Know Issues:
 - Don't validate data from API
-- Just show messages with Android Studio
+- Just show Log messages with Android Studio
