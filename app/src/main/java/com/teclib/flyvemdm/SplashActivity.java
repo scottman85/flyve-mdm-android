@@ -21,9 +21,6 @@ public class SplashActivity extends AppCompatActivity {
             abrirMain();
 
         }
-
-
-
     }
 
     private void abrirMain() {

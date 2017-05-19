@@ -1,30 +1,27 @@
 package com.teclib.flyvemdm;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 
-import com.teclib.data.DataStorage;
 import com.teclib.services.MQTTService;
 
 public class MainActivity extends AppCompatActivity {
 
+    private BroadcastReceiver statusReceiver;
+    private IntentFilter mIntent;
+
     Intent mServiceIntent;
     private MQTTService mMQTTService;
 
-    private DataStorage cache;
-
-    private EditText edtBroker;
-    private EditText edtPort;
-    private EditText edtUser;
-    private EditText edtPassword;
-    private EditText edtTopic;
+    private TextView tvMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,48 +37,8 @@ public class MainActivity extends AppCompatActivity {
             startService(mServiceIntent);
         }
 
-        cache = new DataStorage(getApplicationContext());
+        tvMsg = (TextView) findViewById(R.id.tvMsg);
 
-        String mBroker = cache.getVariablePermanente("broker");
-        String mPort = cache.getVariablePermanente("port");
-        String mUser = cache.getVariablePermanente("agent_id");
-        String mPassword = cache.getVariablePermanente("mqttpasswd");
-        String mTopic = cache.getVariablePermanente("topic");
-
-        edtBroker = (EditText) findViewById(R.id.edtbroker);
-        edtBroker.setText(mBroker);
-
-        edtPort = (EditText) findViewById(R.id.edtport);
-        edtPort.setText(mPort);
-
-        edtUser = (EditText) findViewById(R.id.edtUser);
-        edtUser.setText(mUser);
-
-        edtPassword = (EditText) findViewById(R.id.edtPassword);
-        edtPassword.setText(mPassword);
-
-        edtTopic = (EditText) findViewById(R.id.edtTopic);
-        edtTopic.setText(mTopic);
-
-        Button btnConnect = (Button) findViewById(R.id.btnConnect);
-        btnConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                cache.setVariablePermanente("broker", edtBroker.getText().toString());
-                cache.setVariablePermanente("port", edtPort.getText().toString());
-                cache.setVariablePermanente("agent_id", edtUser.getText().toString());
-                cache.setVariablePermanente("mqttpasswd", edtPassword.getText().toString());
-                cache.setVariablePermanente("topic", edtTopic.getText().toString());
-
-                if (!isMyServiceRunning(mMQTTService.getClass())) {
-                    startService(mServiceIntent);
-                } else {
-                    stopService(mServiceIntent);
-                    startService(mServiceIntent);
-                }
-            }
-        });
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -96,6 +53,30 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String type = intent.getStringExtra("message");  //get the type of message from MyGcmListenerService 1 - lock or 0 -Unlock
+            tvMsg.setText( type );
+        }
+    };
+
+    @Override
+    protected void onPause() {
+        if(mIntent != null) {
+            unregisterReceiver(statusReceiver);
+            mIntent = null;
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        //registerReceiver(statusReceiver,mIntent);
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(broadcastReceiver, new IntentFilter("NOW"));
+    }
 
     @Override
     protected void onDestroy() {

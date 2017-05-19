@@ -11,99 +11,14 @@
         android:orientation="vertical"
         >
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/layout_edtBroker"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-        <EditText
-            android:id="@+id/edtbroker"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="broker"
-            style="@style/textRegular"
-            />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/layout_edtPort"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-        <EditText
-            android:id="@+id/edtport"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="port"
-            style="@style/textRegular"
-            />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/layout_edtUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-        <EditText
-            android:id="@+id/edtUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="user"
-            style="@style/textRegular"
-            />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/layout_edtPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-            <EditText
-                android:id="@+id/edtPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:hint="Password"
-                style="@style/textRegular"
-                />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/layout_edtTopic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-            <EditText
-                android:id="@+id/edtTopic"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:hint="Topic"
-                style="@style/textRegular"
-                />
-
-        </android.support.design.widget.TextInputLayout>
-
         <TextView
             android:id="@+id/tvMsg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/textRegular"
-            />
-
-        <Button
-            android:id="@+id/btnConnect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Connect"
+            android:text="Waiting for MQTT Message"
+            android:gravity="center"
+            android:layout_margin="20dp"
             />
 
     </LinearLayout>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.teclib.data.DataStorage;
@@ -21,6 +22,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * Created by rafaelhernandez on 09/05/2016.
@@ -72,13 +75,13 @@ public class MQTTService extends Service implements MqttCallback {
         cache = new DataStorage(this.getApplicationContext());
 
         mBroker = cache.getVariablePermanente("broker");
-        mPort = cache.getVariablePermanente("port");
-        mUser = cache.getVariablePermanente("agent_id");
-        mPassword = cache.getVariablePermanente("mqttpasswd");
+        mPort = "8883"; //cache.getVariablePermanente("port");
+        mUser = "rafa"; //cache.getVariablePermanente("agent_id");
+        mPassword = "azlknvjkfbsdklfdsgfd"; //cache.getVariablePermanente("mqttpasswd");
         mTopic = cache.getVariablePermanente("topic");
 
         String clientId = MqttClient.generateClientId();
-        client = new MqttAndroidClient(this.getApplicationContext(), "tcp://" + mBroker + ":" + mPort,
+        client = new MqttAndroidClient(this.getApplicationContext(), "ssl://" + mBroker + ":" + mPort,
                 clientId);
 
         client.setCallback( this );
@@ -90,6 +93,17 @@ public class MQTTService extends Service implements MqttCallback {
             options.setCleanSession(true);
             options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
             options.setConnectionTimeout(0);
+
+            try {
+                SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+                sslContext.init(null, null, null);
+
+                options.setSocketFactory(sslContext.getSocketFactory());
+
+                Log.d("Flyve", "ssl socket factory created from flyve ca");
+            } catch (Exception ex) {
+                Log.e("Flyve","error while building ssl mqtt cnx", ex);
+            }
 
             IMqttToken token = client.connect(options);
             token.setActionCallback(new IMqttActionListener() {
@@ -134,6 +148,12 @@ public class MQTTService extends Service implements MqttCallback {
             // KeepAlive
             if (jsonObj.has("query")) {
                 if ("Ping".equals(jsonObj.getString("query"))) {
+
+                    Intent in = new Intent();
+                    in.putExtra("message", "PING!");
+                    in.setAction("NOW");
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
+
                     sendKeepAlive();
                     return;
                 }
@@ -173,6 +193,11 @@ public class MQTTService extends Service implements MqttCallback {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     // The message was published
                     Log.d(TAG, "suscribed");
+
+                    Intent in = new Intent();
+                    in.putExtra("message", "suscribed");
+                    in.setAction("NOW");
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
                 }
 
                 @Override
@@ -181,6 +206,11 @@ public class MQTTService extends Service implements MqttCallback {
                     // The subscription could not be performed, maybe the user was not
                     // authorized to subscribe on the specified topic e.g. using wildcards
                     Log.d(TAG, "ERROR: " + exception.getMessage());
+
+                    Intent in = new Intent();
+                    in.putExtra("message", "ERROR: " + exception.getMessage());
+                    in.setAction("NOW");
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
 
                 }
             });

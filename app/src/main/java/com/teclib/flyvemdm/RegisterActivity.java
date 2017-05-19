@@ -2,8 +2,10 @@ package com.teclib.flyvemdm;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -79,6 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         txtName = (EditText) findViewById(R.id.txtName);
         txtEmail = (EditText) findViewById(R.id.txtEmail);
+        txtEmail.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
 
         btn_register = (Button) findViewById(R.id.btn_register);
         btn_register.setOnClickListener(new View.OnClickListener() {
@@ -228,7 +231,7 @@ public class RegisterActivity extends AppCompatActivity {
             try {
                 payload.put("_email", txtEmail.getText());
                 payload.put("_invitation_token", cache.getVariablePermanente("invitation_token"));
-                payload.put("_serial", "0123456AABC-321"); //Build.SERIAL
+                payload.put("_serial", Build.SERIAL); //Build.SERIAL
                 payload.put("csr", "");
                 payload.put("firstname", txtName.getText());
                 payload.put("lastname", "Without");
